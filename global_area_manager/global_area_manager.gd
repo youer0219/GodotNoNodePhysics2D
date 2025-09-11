@@ -19,7 +19,7 @@ func _ready() -> void:
 	
 	space = get_world_2d().space
 
-func add_area(area_data: AreaData, area_owner: Node, area_transform: Transform2D = Transform2D()) -> AreaInstance:
+func add_area(area_data: AreaData, area_owner: Object, area_transform: Transform2D = Transform2D()) -> AreaInstance:
 	var instance: AreaInstance
 	if use_pool and instance_pool.size() > 0:
 		instance = instance_pool.pop_back() as AreaInstance
@@ -57,6 +57,11 @@ func clear_pool_instances():
 func clear() -> void:
 	clear_active_instances()
 	clear_pool_instances()
+
+func get_area_owner(area_rid:RID)->Object:
+	if instances.has(area_rid):
+		return instances[area_rid].get_owner()
+	return null
 
 func set_area_transform(area_rid: RID, xform: Transform2D) -> void:
 	if instances.has(area_rid):

@@ -10,7 +10,7 @@ signal area_exited(area: Node, other_area_rid: RID, self_area_rid: RID)
 var area_rid: RID
 var data: AreaData
 var shape_rid: RID 
-var owner: Node
+var owner_weakref: WeakRef
 var transform:Transform2D
 var position: Vector2:
 	get:
@@ -38,13 +38,13 @@ class BodyState:
 	var node: WeakRef  # 弱引用，避免循环引用
 	var rc: int = 0    # 引用计数
 	var in_tree: bool = false
-	
+
 class AreaState:
 	var node: WeakRef  # 弱引用，避免循环引用
 	var rc: int = 0    # 引用计数
 	var in_tree: bool = false
 
-func _init(area_data: AreaData, area_owner: Node, area_transform: Transform2D, space:RID):
+func _init(area_data: AreaData, area_owner: Object, area_transform: Transform2D, space:RID):
 	area_rid = PhysicsServer2D.area_create()
 	setup(area_data,area_owner,area_transform,space)
 
@@ -52,9 +52,9 @@ func set_transform(xform: Transform2D) -> void:
 	position = xform.origin
 	PhysicsServer2D.area_set_transform(area_rid, xform)
 
-func setup(area_data: AreaData, area_owner: Node, area_transform: Transform2D, space: RID) -> void:
+func setup(area_data: AreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
 	data = area_data
-	owner = area_owner
+	owner_weakref = weakref(area_owner)
 	transform = area_transform
 	
 	monitoring = data.monitoring
@@ -67,9 +67,12 @@ func setup(area_data: AreaData, area_owner: Node, area_transform: Transform2D, s
 	PhysicsServer2D.area_set_collision_layer(area_rid, data.collision_layer)
 	PhysicsServer2D.area_set_collision_mask(area_rid, data.collision_mask)
 
+func get_owner()->Object:
+	return owner_weakref.get_ref()
+
 func clear_for_pool():
 	data = null
-	owner = null
+	owner_weakref = null
 	transform = Transform2D()
 	monitorable = false
 	monitoring = false
