@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://dwkft5y4c3o68"]
+[gd_scene load_steps=7 format=3 uid="uid://dwkft5y4c3o68"]
 
-[ext_resource type="Script" uid="uid://ct8qnck4a44gc" path="res://global_area_manager/test/test_area_manager.gd" id="1_3j68d"]
+[ext_resource type="Script" uid="uid://ct8qnck4a44gc" path="res://test/test_global_area_manager/test_area_manager.gd" id="1_3j68d"]
 [ext_resource type="Script" uid="uid://dtgl4b7kl0s37" path="res://global_area_manager/area_data.gd" id="2_682pl"]
+[ext_resource type="PackedScene" uid="uid://cfar5b6sgh4yb" path="res://test/tool/PerformanceLabel.tscn" id="3_e2m1b"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_682pl"]
 
@@ -41,6 +42,11 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="PerformanceLabel" parent="CanvasLayer/Control" instance=ExtResource("3_e2m1b")]
+layout_mode = 0
+offset_right = 80.0
+offset_bottom = 40.0
 
 [connection signal="area_entered" from="TestArea2D" to="." method="_on_test_area_2d_area_entered"]
 [connection signal="area_shape_entered" from="TestArea2D" to="." method="_on_test_area_2d_area_shape_entered"]

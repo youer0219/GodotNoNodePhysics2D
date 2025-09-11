@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://cfar5b6sgh4yb"]
+
+[ext_resource type="Script" uid="uid://4v4h1sphrx5m" path="res://test/tool/performance_label.gd" id="1_ijoug"]
+
+[node name="PerformanceLabel" type="Label"]
+custom_minimum_size = Vector2(80, 40)
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("1_ijoug")
