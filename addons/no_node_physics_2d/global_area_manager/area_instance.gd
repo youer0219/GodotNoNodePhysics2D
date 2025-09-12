@@ -12,25 +12,26 @@ var data: AreaData
 var shape_rid: RID 
 var owner_weakref: WeakRef
 
-var transform: Transform2D = Transform2D.IDENTITY
+var transform: Transform2D = Transform2D.IDENTITY:set = set_transform
 
 var position: Vector2:
 	get: return transform.origin
 	set(value):
 		transform.origin = value
-		PhysicsServer2D.area_set_transform(area_rid, transform)
 var rotation: float:
 	get: return transform.get_rotation()
 	set(value):
 		transform = transform.rotated(value - transform.get_rotation())
-		PhysicsServer2D.area_set_transform(area_rid, transform)
 var scale: Vector2:
 	get: return transform.get_scale()
 	set(value):
 		var current = transform.get_scale()
 		if current != Vector2.ZERO:
 			transform = transform.scaled(value / current)
-			PhysicsServer2D.area_set_transform(area_rid, transform)
+
+func set_transform(new_transform:Transform2D):
+	transform = new_transform
+	PhysicsServer2D.area_set_transform(area_rid, transform)
 
 # 设置碰撞层
 func set_collision_layer(layer: int) -> void:

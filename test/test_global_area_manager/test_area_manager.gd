@@ -26,7 +26,7 @@ func _ready() -> void:
 	tween.tween_callback(add_areas.bind(area_data,5)).set_delay(0.2)
 
 func _physics_process(delta: float) -> void:
-	for instance in area_instances:
+	for instance:AreaInstance in area_instances:
 		## TODO: 疑似失效
 		var instance_transform = Transform2D(0,instance.position + Vector2(10,10) * delta)
 		instance.set_transform(instance_transform)
