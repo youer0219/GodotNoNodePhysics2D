@@ -11,13 +11,46 @@ var area_rid: RID
 var data: AreaData
 var shape_rid: RID 
 var owner_weakref: WeakRef
-var transform:Transform2D
+
+var transform: Transform2D = Transform2D.IDENTITY
+
 var position: Vector2:
-	get:
-		return transform.get_origin()
+	get: return transform.origin
 	set(value):
 		transform.origin = value
-		## TODO:未来修改该属性可能直接引发set_transform方法
+		PhysicsServer2D.area_set_transform(area_rid, transform)
+var rotation: float:
+	get: return transform.get_rotation()
+	set(value):
+		transform = transform.rotated(value - transform.get_rotation())
+		PhysicsServer2D.area_set_transform(area_rid, transform)
+var scale: Vector2:
+	get: return transform.get_scale()
+	set(value):
+		var current = transform.get_scale()
+		if current != Vector2.ZERO:
+			transform = transform.scaled(value / current)
+			PhysicsServer2D.area_set_transform(area_rid, transform)
+
+# 设置碰撞层
+func set_collision_layer(layer: int) -> void:
+	PhysicsServer2D.area_set_collision_layer(area_rid, layer)
+
+# 设置碰撞掩码
+func set_collision_mask(mask: int) -> void:
+	PhysicsServer2D.area_set_collision_mask(area_rid, mask)
+
+# 设置区域所在的空间
+func set_space(space: RID) -> void:
+	PhysicsServer2D.area_set_space(area_rid, space)
+
+# 设置形状的变换
+func set_shape_transform(shape_idx: int, shape_transform: Transform2D) -> void:
+	PhysicsServer2D.area_set_shape_transform(area_rid, shape_idx, shape_transform)
+
+# 设置形状是否禁用
+func set_shape_disabled(shape_idx: int, disabled: bool) -> void:
+	PhysicsServer2D.area_set_shape_disabled(area_rid, shape_idx, disabled)
 
 # 监控属性
 var monitoring: bool = true:
@@ -47,10 +80,6 @@ class AreaState:
 func _init(area_data: AreaData, area_owner: Object, area_transform: Transform2D, space:RID):
 	area_rid = PhysicsServer2D.area_create()
 	setup(area_data,area_owner,area_transform,space)
-
-func set_transform(xform: Transform2D) -> void:
-	position = xform.origin
-	PhysicsServer2D.area_set_transform(area_rid, xform)
 
 func setup(area_data: AreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
 	data = area_data

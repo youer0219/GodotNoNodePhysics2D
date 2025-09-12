@@ -5,6 +5,7 @@ extends Node2D
 ## 2.更多性能测试
 ## 3.提供更多的调整Area的方法
 ## 4.area的set_transform方法疑似无效，碰撞对对数在位移一段时间后无变化
+	## 未来可能设定一个node2d-instance类，但没有渲染部分
 
 ## NOTE: 目前area-instance需要在_on_test_area_2d_area_shape_entered中才能被精确发现
 ## Area2D似乎也会被发现，但只会发射一次area-enter信号
