@@ -1,0 +1,17 @@
+● Dictionary intersect_ray(parameters: PhysicsRayQueryParameters2D)
+与一个给定空间中的一个射线相交。射线位置和其他参数通过 PhysicsRayQueryParameters2D 定义。返回的对象是一个包含以下字段的字典：
+collider：该碰撞对象。
+collider_id：该碰撞对象的 ID。
+normal：在相交点处该对象的表面法线；如果射线从形状内部开始，并且 PhysicsRayQueryParameters2D.hit_from_inside 为 true，则为 Vector2(0, 0)。
+position：该相交点。
+rid：该相交对象的 RID。
+shape：该碰撞形状的形状索引。
+如果射线没有与任何东西相交，则返回一个空字典。
+
+● Array[Dictionary] intersect_shape(parameters: PhysicsShapeQueryParameters2D, max_results: int = 32)
+检查通过 PhysicsShapeQueryParameters2D 对象给出的形状与空间的交点。相交的形状会以数组的形式返回，该数组包含有以下字段的字典：
+collider：碰撞对象。
+collider_id：碰撞对象的 ID。
+rid：相交对象的RID。
+shape：碰撞形状的形状索引。
+可以使用 max_results 参数限制相交的数量，以减少处理时间。
