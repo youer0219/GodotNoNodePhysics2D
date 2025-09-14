@@ -1,10 +1,10 @@
 # ============================================================================
-#  AreaInstance.gd
+#  QuickAreaInstance.gd
 # ---------------------------------------------------------------------------
 #  轻量级 2D 区域实例，直接操作 PhysicsServer2D，
 #  支持进入/离开信号、引用计数、树生命周期管理。
 # ============================================================================
-class_name AreaInstance
+class_name QuickAreaInstance
 extends Instance2D
 
 # ------------------------------------------------------------------
@@ -20,7 +20,7 @@ signal body_exited(body: Node, body_rid: RID, area_rid: RID)
 # ------------------------------------------------------------------
 var area_rid: RID
 var shape_rid: RID
-var data: AreaData
+var data: QuickAreaData
 var owner_weakref: WeakRef
 
 # ------------------------------------------------------------------
@@ -55,11 +55,11 @@ class AreaState:
 # ==============================================================================
 #  构造 / 初始化
 # ==============================================================================
-func _init(area_data: AreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
+func _init(area_data: QuickAreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
 	area_rid = PhysicsServer2D.area_create()
 	setup(area_data, area_owner, area_transform, space)
 
-func setup(area_data: AreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
+func setup(area_data: QuickAreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
 	data            = area_data
 	owner_weakref   = weakref(area_owner)
 	transform       = area_transform
@@ -299,7 +299,7 @@ func _on_body_monitor_callback(
 # ==============================================================================
 #  工具：形状创建
 # ==============================================================================
-func _create_area_shape(new_area_data: AreaData) -> void:
+func _create_area_shape(new_area_data: QuickAreaData) -> void:
 	var sr = new_area_data.shape_resource
 	match typeof(sr):
 		TYPE_OBJECT:
@@ -321,7 +321,7 @@ func _create_area_shape(new_area_data: AreaData) -> void:
 			else:
 				push_error("Unsupported shape type: " + sr.get_class())
 		TYPE_NIL:
-			push_error("AreaData.shape_resource is null!")
+			push_error("QuickAreaData.shape_resource is null!")
 		_:
 			push_error("Unknown shape_resource type!")
 

@@ -1,5 +1,5 @@
-# AreaData 作为资源，存储共享属性
-class_name AreaData
+# QuickAreaData 作为资源，存储共享属性
+class_name QuickAreaData
 extends Resource
 
 @export var shape_resource: Shape2D

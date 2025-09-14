@@ -1,8 +1,8 @@
 extends Area2D
 
-var instances: Dictionary = {}  # RID -> AreaInstance
+var instances: Dictionary = {}  # RID -> QuickAreaInstance
 var space: RID
-var instance_pool: Array[AreaInstance] = []
+var instance_pool: Array[QuickAreaInstance] = []
 
 @export var use_pool: bool = true:
 	set(value):
@@ -19,13 +19,13 @@ func _ready() -> void:
 	
 	space = get_world_2d().space
 
-func add_area(area_data: AreaData, area_owner: Object, area_transform: Transform2D = Transform2D()) -> AreaInstance:
-	var instance: AreaInstance
+func add_area(area_data: QuickAreaData, area_owner: Object, area_transform: Transform2D = Transform2D()) -> QuickAreaInstance:
+	var instance: QuickAreaInstance
 	if use_pool and instance_pool.size() > 0:
-		instance = instance_pool.pop_back() as AreaInstance
+		instance = instance_pool.pop_back() as QuickAreaInstance
 		instance.setup(area_data, area_owner, area_transform, space)
 	else:
-		instance = AreaInstance.new(area_data, area_owner, area_transform, space)
+		instance = QuickAreaInstance.new(area_data, area_owner, area_transform, space)
 		PhysicsServer2D.area_attach_object_instance_id(instance.area_rid, get_instance_id())
 	
 	instances[instance.area_rid] = instance
@@ -34,7 +34,7 @@ func add_area(area_data: AreaData, area_owner: Object, area_transform: Transform
 func remove_area(area_rid: RID) -> void:
 	if not instances.has(area_rid):
 		return
-	var instance: AreaInstance = instances[area_rid]
+	var instance: QuickAreaInstance = instances[area_rid]
 	
 	if use_pool:
 		instance.clear_for_pool()
@@ -45,7 +45,7 @@ func remove_area(area_rid: RID) -> void:
 	instances.erase(area_rid)
 
 func clear_active_instances():
-	for instance:AreaInstance in instances.values():
+	for instance:QuickAreaInstance in instances.values():
 		instance.free_rids()
 	instances.clear()
 

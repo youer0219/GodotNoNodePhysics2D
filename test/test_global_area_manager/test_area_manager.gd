@@ -16,9 +16,9 @@ extends Node2D
 	## 比如，一个作用于5个子弹的子弹影响区域，有5个子弹进来后，就禁用碰撞。
 ## NOTE: 区域和查询分离。仅在必要时使用区域。
 
-@export var area_data: AreaData
+@export var area_data: QuickAreaData
 
-var area_instances: Array[AreaInstance] = []
+var area_instances: Array[QuickAreaInstance] = []
 
 func _ready() -> void:
 	await get_tree().create_timer(3.0).timeout
@@ -26,19 +26,19 @@ func _ready() -> void:
 	tween.tween_callback(add_areas.bind(area_data,5)).set_delay(0.2)
 
 func _physics_process(delta: float) -> void:
-	for instance:AreaInstance in area_instances:
+	for instance:QuickAreaInstance in area_instances:
 		## TODO: 疑似失效
 		var instance_transform = Transform2D(0,instance.position + Vector2(10,10) * delta)
 		instance.set_transform(instance_transform)
 
-func add_areas(data: AreaData, num:int = 1, _tranfrom:Transform2D = Transform2D()) -> Array[AreaInstance]:
-	var areas:Array[AreaInstance] = []
+func add_areas(data: QuickAreaData, num:int = 1, _tranfrom:Transform2D = Transform2D()) -> Array[QuickAreaInstance]:
+	var areas:Array[QuickAreaInstance] = []
 	for i in num:
 		var instance = add_area(data,_tranfrom)
 		areas.append(instance)
 	return areas
 
-func add_area(data: AreaData, _tranfrom:Transform2D = Transform2D()) -> AreaInstance:
+func add_area(data: QuickAreaData, _tranfrom:Transform2D = Transform2D()) -> QuickAreaInstance:
 	var instance = GlobalAreaManager.add_area(data, self, _tranfrom)
 	#var index = area_instances.size()
 	#instance.area_entered.connect(_on_area_entered.bind(index))
