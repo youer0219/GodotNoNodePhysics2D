@@ -5,7 +5,7 @@ extends Node2D
 ## 2.更多性能测试
 
 ## NOTE: 目前area-instance需要在_on_test_area_2d_area_shape_entered中才能被精确发现
-## 节点级的信号也会发射，但只会发射一次  ——————  TODO:或者不附加节点，直接为null会更好？
+## 因为不再area上附加节点，所以不会发出area-enter等节点级信号
 
 ## 目前的碰撞对数高了也会很卡。需要管理好碰撞层级。
 	## 传统物理引擎5万以上（1000个相互检测的Area）时，帧率暴降；剑柄表现明显不错，1500个没有下降
@@ -38,11 +38,9 @@ func add_area(data: QuickAreaData, _tranfrom:Transform2D = Transform2D()) -> Qui
 	area_instances.append(instance)
 	return instance
 
-# 通用区域进入处理函数
 func _on_area_entered(node: Area2D, other_area_rid: RID, area_rid: RID, instance_index: int) -> void:
 	print("Area instance ", instance_index, " detected area enter")
-	if node:
-		print("Find node name: ", node.name)
+	print("Find node name: ", node)
 	print("area_rid: ",area_rid," find enter other_area_rid: ",other_area_rid)
 	print("\n")
 

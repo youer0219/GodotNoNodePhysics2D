@@ -1,4 +1,4 @@
-extends Area2D
+extends Node2D
 
 var instances: Dictionary = {}  # RID -> QuickAreaInstance
 var space: RID
@@ -11,12 +11,6 @@ var instance_pool: Array[QuickAreaInstance] = []
 			clear_pool_instances()
 
 func _ready() -> void:
-	monitorable = false
-	monitoring = false
-	collision_layer = 0
-	collision_mask = 0
-	input_pickable = false
-	
 	space = get_world_2d().space
 
 func add_area(area_data: QuickAreaData, area_owner: Object, area_transform: Transform2D = Transform2D()) -> QuickAreaInstance:
@@ -26,7 +20,7 @@ func add_area(area_data: QuickAreaData, area_owner: Object, area_transform: Tran
 		instance.setup(area_data, area_owner, area_transform, space)
 	else:
 		instance = QuickAreaInstance.new(area_data, area_owner, area_transform, space)
-		PhysicsServer2D.area_attach_object_instance_id(instance.area_rid, get_instance_id())
+		#PhysicsServer2D.area_attach_object_instance_id(instance.area_rid, get_instance_id()) ## 不再附加节点。直接为null。
 	
 	instances[instance.area_rid] = instance
 	return instance
