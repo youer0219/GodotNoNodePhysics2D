@@ -46,7 +46,7 @@ func add_area(data: AreaData, _tranfrom:Transform2D = Transform2D()) -> AreaInst
 	return instance
 
 # 通用区域进入处理函数
-func _on_area_entered(node: Node, other_area_rid: RID, area_rid: RID, instance_index: int) -> void:
+func _on_area_entered(node: Area2D, other_area_rid: RID, area_rid: RID, instance_index: int) -> void:
 	print("Area instance ", instance_index, " detected area enter")
 	if node:
 		print("Find node name: ", node.name)

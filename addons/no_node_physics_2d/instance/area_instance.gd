@@ -10,8 +10,8 @@ extends Instance2D
 # ------------------------------------------------------------------
 #  对外信号
 # ------------------------------------------------------------------
-signal area_entered(area: Node, other_area_rid: RID, self_area_rid: RID)
-signal area_exited(area: Node, other_area_rid: RID, self_area_rid: RID)
+signal area_entered(area: Area2D, other_area_rid: RID, self_area_rid: RID)
+signal area_exited(area: Area2D, other_area_rid: RID, self_area_rid: RID)
 signal body_entered(body: Node, body_rid: RID, area_rid: RID)
 signal body_exited(body: Node, body_rid: RID, area_rid: RID)
 
