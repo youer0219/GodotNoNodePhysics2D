@@ -159,6 +159,30 @@ func set_transform(new_transform: Transform2D) -> void:
 	super(new_transform)
 	PhysicsServer2D.area_set_transform(area_rid, transform)
 
+# 设置重力属性
+func set_gravity_properties(space_override: int, is_point: bool, point_center: Vector2, unit_distance: float, direction: Vector2, strength: float) -> void:
+	PhysicsServer2D.area_set_param(area_rid, PhysicsServer2D.AREA_PARAM_GRAVITY_OVERRIDE_MODE, space_override)
+	PhysicsServer2D.area_set_param(area_rid, PhysicsServer2D.AREA_PARAM_GRAVITY_IS_POINT, is_point)
+	
+	if is_point:
+		PhysicsServer2D.area_set_param(area_rid, PhysicsServer2D.AREA_PARAM_GRAVITY_VECTOR, point_center)
+		PhysicsServer2D.area_set_param(area_rid, PhysicsServer2D.AREA_PARAM_GRAVITY_POINT_UNIT_DISTANCE, unit_distance)
+	else:
+		PhysicsServer2D.area_set_param(area_rid, PhysicsServer2D.AREA_PARAM_GRAVITY_VECTOR, direction)
+	
+	PhysicsServer2D.area_set_param(area_rid, PhysicsServer2D.AREA_PARAM_GRAVITY, strength)
+
+# 设置阻尼属性
+func set_damp_properties(linear_mode: int, linear_damp_value: float, angular_mode: int, angular_damp_value: float) -> void:
+	PhysicsServer2D.area_set_param(area_rid, PhysicsServer2D.AREA_PARAM_LINEAR_DAMP_OVERRIDE_MODE, linear_mode)
+	PhysicsServer2D.area_set_param(area_rid, PhysicsServer2D.AREA_PARAM_LINEAR_DAMP, linear_damp_value)
+	PhysicsServer2D.area_set_param(area_rid, PhysicsServer2D.AREA_PARAM_ANGULAR_DAMP_OVERRIDE_MODE, angular_mode)
+	PhysicsServer2D.area_set_param(area_rid, PhysicsServer2D.AREA_PARAM_ANGULAR_DAMP, angular_damp_value)
+
+# 设置优先级
+func set_priority(new_priority: int) -> void:
+	PhysicsServer2D.area_set_param(area_rid, PhysicsServer2D.AREA_PARAM_PRIORITY, new_priority)
+
 # ==============================================================================
 #  监控开关
 # ==============================================================================

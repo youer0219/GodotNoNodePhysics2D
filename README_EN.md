@@ -17,8 +17,8 @@ Regarding "collision with external Area2D nodes":
 ### QuickArea
 
 Current QuickArea implementation:
-- Focuses on core functionalities like collision detection and signal emission, without handling properties like gravity or damping (these were found to slow down performance in tests and are generally not used by the author).
-  - Future updates will provide encapsulated methods for adjusting these properties.
+- Focuses on core functionalities like collision detection and signal emission, without handling properties like gravity or damping.
+	- These were found to slow down performance in tests.Provides related set method encapsulation.
 - The signal system focuses on overall Area entry and exit events, without shape-level signals.
 - Currently, an area supports only one shape.
 
