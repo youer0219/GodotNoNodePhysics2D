@@ -21,10 +21,6 @@ metadata/_custom_type_script = "uid://dtgl4b7kl0s37"
 script = ExtResource("1_3j68d")
 area_data = SubResource("Resource_7txv2")
 
-[node name="Area2D" type="Area2D" parent="."]
-monitoring = false
-monitorable = false
-
 [node name="Camera2D" type="Camera2D" parent="."]
 process_callback = 0
 

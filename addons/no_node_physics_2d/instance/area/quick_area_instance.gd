@@ -397,3 +397,7 @@ func free_rids() -> void:
 	if area_rid.is_valid():
 		PhysicsServer2D.free_rid(area_rid)
 		area_rid = RID()
+
+func _notification(what):
+	if what == NOTIFICATION_PREDELETE:
+		free_rids()
