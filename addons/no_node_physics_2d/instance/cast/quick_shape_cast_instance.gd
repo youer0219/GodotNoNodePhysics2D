@@ -5,3 +5,4 @@ class_name QuickShapeCastInstance
 var margin:float
 var max_results:int
 var shape:Shape2D
+var query:PhysicsShapeQueryParameters2D
