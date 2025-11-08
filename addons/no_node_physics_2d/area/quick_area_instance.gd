@@ -58,6 +58,9 @@ class AreaState:
 func _init(area_data: QuickAreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
 	area_rid = PhysicsServer2D.area_create()
 	setup(area_data, area_owner, area_transform, space)
+	# 注册到全局管理器
+	if GlobalAreaManager:
+		GlobalAreaManager.register_instance(self)
 
 func setup(area_data: QuickAreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
 	data            = area_data
@@ -350,21 +353,8 @@ func _create_area_shape(new_area_data: QuickAreaData) -> void:
 			push_error("Unknown shape_resource type!")
 
 # ==============================================================================
-#  清理 / 回池 / 销毁
+#  清理 / 销毁
 # ==============================================================================
-func clear_for_pool() -> void:
-	data        = null
-	owner_weakref = null
-	transform   = Transform2D()
-	monitorable = false
-	monitoring  = false
-	PhysicsServer2D.area_clear_shapes(area_rid)
-	PhysicsServer2D.area_set_collision_layer(area_rid, 0)
-	PhysicsServer2D.area_set_collision_mask(area_rid, 0)
-	if shape_rid.is_valid():
-		PhysicsServer2D.free_rid(shape_rid)
-		shape_rid = RID()
-
 func clear_monitoring() -> void:
 	# 断开所有树信号并补发 exit
 	for body_rid in body_map.keys():
@@ -400,4 +390,7 @@ func free_rids() -> void:
 
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
+		# 从全局管理器注销
+		if GlobalAreaManager:
+			GlobalAreaManager.unregister_instance(area_rid)
 		free_rids()
