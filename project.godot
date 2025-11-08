@@ -17,7 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-GlobalAreaManager="*res://addons/no_node_physics_2d/manager/global_area_manager.gd"
+GlobalAreaManager="*res://addons/no_node_physics_2d/area/global_area_manager.gd"
 
 [editor_plugins]
 
