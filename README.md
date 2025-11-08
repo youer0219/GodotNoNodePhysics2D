@@ -1,4 +1,4 @@
-# NoNodePhysics
+# NoNodePhysics2D
 
 [English](README_EN.md)
 
@@ -9,8 +9,9 @@
 
 重构期间请谨慎使用
 
-- 反思Manager必要性
-- 实现更正确的测试用例
+- Manager的功能改进
+- 实现更正确的测试用例和实践DEMO
+- 抽象类似乎不必要
 
 ## Godot版本
 

@@ -1,4 +1,4 @@
-# NoNodePhysics
+# NoNodePhysics2D
 
 [Chinese](README.md)
 
