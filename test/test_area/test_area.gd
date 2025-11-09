@@ -1,6 +1,5 @@
 extends Node2D
 
-
 @export var base_area_data:QuickAreaData
 
 func _ready() -> void:
@@ -32,6 +31,7 @@ func base_test():
 	test_and_print(finded_instance.get_owner() == null \
 	and GlobalAreaManager.get_area_owner(area_rid) == null,
 	"销毁拥有者节点后，拥有者弱引用自动失效")
+	
 	
 	## 实例销毁测试
 	instance = null
@@ -66,18 +66,42 @@ func test_collision():
 			var other_area_instance := GlobalAreaManager.get_area_instance(other_area_rid)
 			print("area_exited  other_area_instance: ",other_area_instance)
 	)
+	base_instance.body_entered.connect(
+		func(body: Node, _body_rid: RID, area_rid: RID):
+			print("body_entered body: ",body)
+			print("body_entered area_rid: ",area_rid)
+	)
+	base_instance.body_exited.connect(
+		func(body: Node, _body_rid: RID, area_rid: RID):
+			print("body_exited body: ",body)
+			print("body_exited area_rid: ",area_rid)
+	)
 	
 	## Instance-Instance
 	var new_instance := GlobalAreaManager.create_area(data,self)
 	print("new_instance_area_rid: ",new_instance.area_rid)
 	print("new_instance: ",new_instance)
 	await get_tree().physics_frame
-	await get_tree().physics_frame  ## TODO:需要等待两帧才可触发碰撞，原理存疑
+	await get_tree().physics_frame  ## TODO:需要等待两帧才可触发碰撞，原理存疑，与一般节点行为不同
+	
+	# Instance的获取area方法无法获取instance实例，所以不测试相关方法
+	
 	new_instance = null # 自动回收销毁
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	
-	print_with_color("自行检查信号输出和new_instance的属性是否匹配","yellow")
+	## Instance-Body
+	var new_body := RigidBody2D.new()
+	new_body.gravity_scale = 0.0
+	add_child(new_body)
+	print("new_body: ",new_body)
+	var new_collision_node := CollisionShape2D.new()
+	var new_shape := CircleShape2D.new()
+	new_collision_node.shape = new_shape
+	new_body.add_child(new_collision_node)
+	await get_tree().physics_frame  ## 与instance不同，这次只要一帧就好了
+	
+	print_with_color("\n自行检查信号输出和new_instance的属性是否匹配","yellow")
 	print("\n")
 
 func test_and_print(is_success:bool,success_msg:String):
