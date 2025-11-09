@@ -43,11 +43,3 @@ func set_area_transform(area_rid: RID, xform: Transform2D) -> void:
 # 获取所有活跃的AreaInstance数量（调试用）
 func get_active_instance_count() -> int:
 	return instances.size()
-
-# 清理所有实例（主要用于场景切换）
-func clear_all_instances() -> void:
-	for weak_ref in instances.values():
-		var instance = weak_ref.get_ref()
-		if instance:
-			instance.free_rids()
-	instances.clear()
