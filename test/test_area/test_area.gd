@@ -77,7 +77,7 @@ func test_collision():
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	
-	print_rich("[color=yellow]%s[/color]" % "自行检查信号输出和new_instance的属性是否匹配")
+	print_with_color("自行检查信号输出和new_instance的属性是否匹配","yellow")
 	print("\n")
 
 func test_and_print(is_success:bool,success_msg:String):
@@ -85,3 +85,6 @@ func test_and_print(is_success:bool,success_msg:String):
 		print_rich("[color=green]%s[/color]" % success_msg)
 	else:
 		print_rich("[color=red][b]NOT %s[/b][/color]" % success_msg)
+
+func print_with_color(msg:String,color_msg:String = "white"):
+	print_rich("[color=%s]%s[/color]" % [color_msg,msg])
