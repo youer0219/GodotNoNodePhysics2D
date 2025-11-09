@@ -380,17 +380,13 @@ func clear_monitoring() -> void:
 	body_map.clear()
 	area_map.clear()
 
-func free_rids() -> void:
-	if shape_rid.is_valid():
-		PhysicsServer2D.free_rid(shape_rid)
-		shape_rid = RID()
-	if area_rid.is_valid():
-		PhysicsServer2D.free_rid(area_rid)
-		area_rid = RID()
-
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
 		# 从全局管理器注销
-		if GlobalAreaManager:
-			GlobalAreaManager.unregister_instance(area_rid)
-		free_rids()
+		GlobalAreaManager.unregister_instance(area_rid)
+		if shape_rid.is_valid():
+			PhysicsServer2D.free_rid(shape_rid)
+			shape_rid = RID()
+		if area_rid.is_valid():
+			PhysicsServer2D.free_rid(area_rid)
+			area_rid = RID()
