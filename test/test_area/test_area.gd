@@ -5,6 +5,7 @@ extends Node2D
 
 func _ready() -> void:
 	base_test()
+	test_collision()
 
 func base_test():
 	## 实例创建测试
@@ -44,10 +45,43 @@ func base_test():
 	"实例自动销毁后，原先的area_rid无法使用")
 	test_and_print(PhysicsServer2D.shape_get_data(shape_rid) == null,
 	"实例自动销毁后，原先的shape-rid无法使用")
+	
+	print("\n")
 
+## TODO: Node2D部分还缺少测试。感觉涉及部分代码改动，如将position改为global-potision，暂时搁置
+
+func test_collision():
+	var data := base_area_data.duplicate()
+	var base_instance := GlobalAreaManager.create_area(data,self)
+	# TODO: 这里的 self_area_rid 的必要性存疑
+	base_instance.area_entered.connect(
+		func(_area: Area2D, other_area_rid: RID, _self_area_rid: RID):
+			print("area_entered  other_area_rid: ",other_area_rid)
+			var other_area_instance := GlobalAreaManager.get_area_instance(other_area_rid)
+			print("area_entered  other_area_instance: ",other_area_instance)
+	)
+	base_instance.area_exited.connect(
+		func(_area: Area2D, other_area_rid: RID, _self_area_rid: RID):
+			print("area_exited  other_area_rid: ",other_area_rid)
+			var other_area_instance := GlobalAreaManager.get_area_instance(other_area_rid)
+			print("area_exited  other_area_instance: ",other_area_instance)
+	)
+	
+	## Instance-Instance
+	var new_instance := GlobalAreaManager.create_area(data,self)
+	print("new_instance_area_rid: ",new_instance.area_rid)
+	print("new_instance: ",new_instance)
+	await get_tree().physics_frame
+	await get_tree().physics_frame  ## TODO:需要等待两帧才可触发碰撞，原理存疑
+	new_instance = null # 自动回收销毁
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	
+	print_rich("[color=yellow]%s[/color]" % "自行检查信号输出和new_instance的属性是否匹配")
+	print("\n")
 
 func test_and_print(is_success:bool,success_msg:String):
 	if is_success:
-		print_rich("[color=green][b]%s[/b][/color]" % success_msg)
+		print_rich("[color=green]%s[/color]" % success_msg)
 	else:
 		print_rich("[color=red][b]NOT %s[/b][/color]" % success_msg)
