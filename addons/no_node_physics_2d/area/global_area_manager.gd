@@ -1,7 +1,7 @@
 # GlobalAreaManager.gd
 extends Node2D
 
-var instances: Dictionary = {}  # RID -> QuickAreaInstance
+var instances: Dictionary = {}  # RID -> WeakRef(QuickAreaInstance)
 var space: RID
 
 func _ready() -> void:
@@ -9,7 +9,7 @@ func _ready() -> void:
 
 # 注册AreaInstance
 func register_instance(instance: QuickAreaInstance) -> void:
-	instances[instance.area_rid] = instance
+	instances[instance.area_rid] = weakref(instance)
 
 # 注销AreaInstance
 func unregister_instance(area_rid: RID) -> void:
@@ -21,18 +21,24 @@ func create_area(area_data: QuickAreaData, area_owner: Object, area_transform: T
 
 # 根据RID获取AreaInstance的所有者
 func get_area_owner(area_rid: RID) -> Object:
-	var instance = instances.get(area_rid)
-	return instance.get_owner() if instance else null
+	var weak_ref = instances.get(area_rid)
+	if weak_ref:
+		var instance = weak_ref.get_ref()
+		return instance.get_owner() if instance else null
+	return null
 
 # 根据RID获取AreaInstance
 func get_area_instance(area_rid: RID) -> QuickAreaInstance:
-	return instances.get(area_rid)
+	var weak_ref = instances.get(area_rid)
+	return weak_ref.get_ref() if weak_ref else null
 
 # 设置AreaInstance的变换
 func set_area_transform(area_rid: RID, xform: Transform2D) -> void:
-	var instance = instances.get(area_rid)
-	if instance:
-		instance.set_transform(xform)
+	var weak_ref = instances.get(area_rid)
+	if weak_ref:
+		var instance = weak_ref.get_ref()
+		if instance:
+			instance.set_transform(xform)
 
 # 获取所有活跃的AreaInstance数量（调试用）
 func get_active_instance_count() -> int:
@@ -40,6 +46,8 @@ func get_active_instance_count() -> int:
 
 # 清理所有实例（主要用于场景切换）
 func clear_all_instances() -> void:
-	for instance in instances.values():
-		instance.free_rids()
+	for weak_ref in instances.values():
+		var instance = weak_ref.get_ref()
+		if instance:
+			instance.free_rids()
 	instances.clear()
