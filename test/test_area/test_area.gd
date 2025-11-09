@@ -90,7 +90,7 @@ func test_collision():
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	
-	## Instance-Body
+	## Instance-RigidBody2D
 	var new_body := RigidBody2D.new()
 	new_body.gravity_scale = 0.0
 	add_child(new_body)
@@ -103,7 +103,22 @@ func test_collision():
 	
 	new_body.free()
 	
-	print_with_color("\n自行检查信号输出和new_instance的属性是否匹配","yellow")
+	await get_tree().physics_frame
+	
+	## Instance-Area2D
+	var new_area := get_area_node(data)
+	add_child(new_area)
+	new_area.area_shape_entered.connect(
+		func(area_rid: RID, area: Area2D, _area_shape_index: int, _local_shape_index: int):
+			print("area_shape_entered find instance area_rid: ",area_rid)
+			print("area_shape_entered find instance area: ",area)
+	)
+	print("new_area: ",new_area)
+	await get_tree().physics_frame
+	
+	new_area.free()
+	
+	print_with_color("自行检查信号输出和new_instance的属性是否匹配","yellow")
 	print("\n")
 
 func test_and_print(is_success:bool,success_msg:String):
@@ -114,3 +129,14 @@ func test_and_print(is_success:bool,success_msg:String):
 
 func print_with_color(msg:String,color_msg:String = "white"):
 	print_rich("[color=%s]%s[/color]" % [color_msg,msg])
+
+func get_area_node(data:QuickAreaData)->Area2D:
+	var area2d := Area2D.new()
+	area2d.monitorable = data.monitorable
+	area2d.monitoring = data.monitoring
+	area2d.collision_layer = data.collision_layer
+	area2d.collision_mask = data.collision_mask
+	var new_collision_node := CollisionShape2D.new()
+	new_collision_node.shape = data.shape_resource
+	area2d.add_child(new_collision_node)
+	return area2d
