@@ -101,6 +101,8 @@ func test_collision():
 	new_body.add_child(new_collision_node)
 	await get_tree().physics_frame  ## 与instance不同，这次只要一帧就好了
 	
+	new_body.free()
+	
 	print_with_color("\n自行检查信号输出和new_instance的属性是否匹配","yellow")
 	print("\n")
 
