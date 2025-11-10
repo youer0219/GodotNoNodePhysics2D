@@ -41,6 +41,7 @@ func setup(area_data: QuickAreaData, area_owner: Object, area_transform: Transfo
 	PhysicsServer2D.area_set_collision_layer(area_rid, data.collision_layer)
 	PhysicsServer2D.area_set_collision_mask(area_rid, 0) ## 禁止检测其他区域或物体
 	PhysicsServer2D.area_set_monitorable(area_rid, monitorable)
+	PhysicsServer2D.area_attach_object_instance_id(area_rid,self.get_instance_id()) ## 附加自身ObjectID
 
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:

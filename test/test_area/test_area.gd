@@ -4,7 +4,7 @@ extends Node2D
 
 func _ready() -> void:
 	base_test()
-	test_collision()
+	#test_collision()
 
 func base_test():
 	## 实例创建测试
