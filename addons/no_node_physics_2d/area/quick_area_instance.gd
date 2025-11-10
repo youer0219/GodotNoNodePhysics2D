@@ -25,9 +25,6 @@ var monitorable: bool = true:
 func _init(area_data: QuickAreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
 	area_rid = PhysicsServer2D.area_create()
 	setup(area_data, area_owner, area_transform, space)
-	# 注册到全局管理器
-	if GlobalAreaManager:
-		GlobalAreaManager.register_instance(self)
 
 func setup(area_data: QuickAreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
 	data            = area_data
@@ -45,8 +42,6 @@ func setup(area_data: QuickAreaData, area_owner: Object, area_transform: Transfo
 
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
-		# 从全局管理器注销
-		GlobalAreaManager.unregister_instance(area_rid)
 		if shape_rid.is_valid():
 			PhysicsServer2D.free_rid(shape_rid)
 			shape_rid = RID()
