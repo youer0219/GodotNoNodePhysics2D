@@ -10,8 +10,7 @@ func base_test():
 	## 实例创建测试
 	var data := base_area_data.duplicate()
 	var test_owner_node:Node = Node.new()
-	# TODO: QuickAreaInstance.new(data,self) 这个的生成是否应该强制使用全局管理呢？
-	var instance := GlobalAreaManager.create_area(data,test_owner_node)
+	var instance := NoNodePhysicsFactory.create_area(data,test_owner_node)
 	var area_rid := instance.area_rid
 	var shape_rid := instance.shape_rid
 	var instance_id := instance.get_instance_id()
@@ -35,7 +34,7 @@ func base_test():
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	
-	var finded_instance = GlobalAreaManager.get_instance_by_rid(area_rid)
+	var finded_instance = NoNodePhysicsFactory.get_instance_by_rid(area_rid)
 	print(finded_instance.get_owner() == test_owner_node)
 	
 	finded_instance = null
