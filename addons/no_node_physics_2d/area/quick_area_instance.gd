@@ -39,9 +39,7 @@ func setup(area_data: QuickAreaData, area_owner: Object, area_transform: Transfo
 	PhysicsServer2D.area_add_shape(area_rid, shape_rid)
 	PhysicsServer2D.area_set_space(area_rid, space)
 	PhysicsServer2D.area_set_collision_layer(area_rid, data.collision_layer)
-	PhysicsServer2D.area_set_collision_mask(area_rid, data.collision_mask)
-	
-	# 强制禁用监控（不能检测其他区域或实体）
+	PhysicsServer2D.area_set_collision_mask(area_rid, 0) ## 禁止检测其他区域或物体
 	PhysicsServer2D.area_set_monitorable(area_rid, monitorable)
 
 func _notification(what):
