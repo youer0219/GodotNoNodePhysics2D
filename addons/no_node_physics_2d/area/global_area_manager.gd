@@ -1,4 +1,4 @@
-# GlobalAreaManager.gd
+# global_area_manager.gd
 extends Node2D
 
 var instances: Dictionary = {}  # RID -> WeakRef(QuickAreaInstance)
