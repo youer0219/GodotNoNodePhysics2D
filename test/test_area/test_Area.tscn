@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://dp66o1tjg6mb8"]
 
 [ext_resource type="Script" uid="uid://d1qfoeicaxru7" path="res://test/test_area/test_area.gd" id="1_baqxv"]
-[ext_resource type="Script" uid="uid://dtgl4b7kl0s37" path="res://addons/no_node_physics_2d/area/quick_area_data.gd" id="2_wqm1r"]
+[ext_resource type="Script" uid="uid://dtgl4b7kl0s37" path="res://addons/no_node_physics_2d/src/area/quick_area_data.gd" id="2_wqm1r"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mj1ue"]
 
