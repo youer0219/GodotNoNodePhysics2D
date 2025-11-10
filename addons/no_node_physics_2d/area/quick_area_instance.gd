@@ -292,7 +292,8 @@ func _on_body_monitor_callback(
 	var entering  = status == PhysicsServer2D.AREA_BODY_ADDED
 
 	if not is_instance_valid(body_obj):
-		emit_signal("body_" + ("entered" if entering else "exited"), null, body_rid, area_rid)
+		if not body_map.has(body_rid):
+			emit_signal("body_" + ("entered" if entering else "exited"), null, body_rid, area_rid)
 		return
 
 	if entering:
