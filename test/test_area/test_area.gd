@@ -4,13 +4,15 @@ extends Node2D
 
 var test_instances: Array[QuickAreaInstance] = []
 var monitor_nodes: Array[Area2D] = []
+var test_signal_str:String = ""
 
 func _ready() -> void:
 	print_rich("[color=yellow]=== 开始扩展测试 ===[/color]")
 	
 	# 依次运行测试
 	await run_all_tests()
-	
+	print_rich("[color=white]信号输出：[/color]")
+	print(test_signal_str)
 	print_rich("[color=yellow]=== 扩展测试完成 ===[/color]")
 
 func run_all_tests() -> void:
@@ -124,7 +126,7 @@ func test_physics_properties() -> void:
 	
 	await test_transform_operations()
 	await test_collision_layers()
-	#await test_monitorable_property()
+	await test_monitorable_property()
 
 func test_transform_operations() -> void:
 	print("  - 变换操作测试")
@@ -179,25 +181,27 @@ func test_collision_layers() -> void:
 	test_and_print(success, "碰撞层设置正确")
 	owner_node.queue_free()
 
-## TODO: 待解决
-#func test_monitorable_property() -> void:
-	#print("  - 监控属性测试")
-	#
-	#var owner_node = Node.new()
-	#var instance = NoNodePhysicsFactory.create_area(base_area_data, owner_node)
-	#
-	## 初始应为true（根据数据）
-	#var initial_monitorable = PhysicsServer2D.area_is_monitorable(instance.area_rid)
-	#test_and_print(initial_monitorable == base_area_data.monitorable, "初始监控属性正确")
-	#
-	## 切换监控属性
-	#instance.monitorable = !base_area_data.monitorable
-	#await get_tree().physics_frame
-	#
-	#var switched_monitorable = PhysicsServer2D.area_is_monitorable(instance.area_rid)
-	#test_and_print(switched_monitorable == !base_area_data.monitorable, "监控属性切换正确")
-	#
-	#owner_node.queue_free()
+func test_monitorable_property() -> void:
+	print("  - 监控属性测试")
+	
+	var not_monitorable_data = base_area_data.duplicate()
+	not_monitorable_data.monitorable = false
+	var instance = NoNodePhysicsFactory.create_area(not_monitorable_data, null)
+	
+	## 创建area-2d节点，理论上应该无法发现instance
+	var area2d := get_area_node(base_area_data)
+	add_child(area2d)
+	area2d.area_shape_entered.connect(
+		func(area_rid: RID, _area: Object, _area_shape_index: int, _local_shape_index: int):
+			test_signal_str += "Test: Monitorable Property\n理论上只打印一次\nmonitorable: %s" %  \
+			NoNodePhysicsFactory.get_area_instance_by_rid(area_rid).monitorable
+	)
+	# 切换监控属性
+	instance.monitorable = true
+	instance = null
+	
+	await get_tree().physics_frame
+
 #endregion
 
 #region 3. 形状功能测试
@@ -506,9 +510,6 @@ func test_and_print(is_success: bool, success_msg: String) -> void:
 		print_rich("    [color=green]✓ %s[/color]" % success_msg)
 	else:
 		print_rich("    [color=red]✗ %s[/color]" % success_msg)
-
-func print_with_color(msg:String,color_msg:String = "white"):
-	print_rich("[color=%s]%s[/color]" % [color_msg,msg])
 
 func get_area_node(data:QuickAreaData,monitoring:bool = true,collision_mask:int = 1)->Area2D:
 	var area2d := Area2D.new()
