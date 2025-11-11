@@ -252,7 +252,7 @@ func test_shape_transforms() -> void:
 	
 	# 测试形状局部变换
 	var shape_transform = Transform2D(PI / 6, Vector2(10, 5))
-	instance.set_shape_transform(0, shape_transform)
+	instance.set_shape_transform(shape_transform)
 	
 	await get_tree().physics_frame
 	

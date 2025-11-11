@@ -62,11 +62,11 @@ func set_collision_layer(layer: int) -> void:
 func set_collision_mask(mask: int) -> void:
 	PhysicsServer2D.area_set_collision_mask(area_rid, mask)
 
-func set_shape_disabled(shape_idx: int, disabled: bool) -> void:
-	PhysicsServer2D.area_set_shape_disabled(area_rid, shape_idx, disabled)
+func set_shape_disabled(disabled: bool) -> void:
+	PhysicsServer2D.area_set_shape_disabled(area_rid, 0, disabled)
 
-func set_shape_transform(shape_idx: int, shape_transform: Transform2D) -> void:
-	PhysicsServer2D.area_set_shape_transform(area_rid, shape_idx, shape_transform)
+func set_shape_transform(shape_transform: Transform2D) -> void:
+	PhysicsServer2D.area_set_shape_transform(area_rid, 0, shape_transform)
 
 func set_space(space: RID) -> void:
 	PhysicsServer2D.area_set_space(area_rid, space)
