@@ -1,72 +1,29 @@
 extends Node2D
 
+## 暂时停止对area的测试开发
+
 @export var base_area_data:QuickAreaData
 
 var test_instances: Array[QuickAreaInstance] = []
 var monitor_nodes: Array[Area2D] = []
-var test_signal_str:String = ""
+#var test_signal_str:String = ""
 
 func _ready() -> void:
 	print_rich("[color=yellow]=== 开始扩展测试 ===[/color]")
 	
 	# 依次运行测试
 	await run_all_tests()
-	print_rich("[color=white]信号输出：[/color]")
-	print(test_signal_str)
+	#print_rich("[color=white]信号输出：[/color]")
+	#print(test_signal_str)
 	print_rich("[color=yellow]=== 扩展测试完成 ===[/color]")
 
 func run_all_tests() -> void:
-	#base_test()
 	await test_lifecycle_management()
 	await test_physics_properties()
 	await test_shape_functionality()
 	@warning_ignore("redundant_await")
 	await test_collision_detection()
 	await test_edge_cases()
-
-func base_test():
-	## 实例创建测试
-	var data := base_area_data.duplicate()
-	var test_owner_node:Node = Node.new()
-	var instance := NoNodePhysicsFactory.create_area(data,test_owner_node)
-	var area_rid := instance.area_rid
-	var shape_rid := instance.shape_rid
-	var instance_id := instance.get_instance_id()
-	
-	var area2d := get_area_node(data)
-	add_child(area2d)
-	area2d.area_shape_entered.connect(
-		func(x_area_rid: RID, _area: Object, _area_shape_index: int, _local_shape_index: int):
-			print("area_shape_entered")
-			print("area_rid: ",x_area_rid)
-			print("area_rid == x_area_rid: ",area_rid == x_area_rid)
-			var id := PhysicsServer2D.area_get_object_instance_id(x_area_rid)
-			print("id == instance_id: ",id == instance_id)
-	)
-	area2d.area_shape_exited.connect(
-		func(x_area_rid: RID, _area: Object, _area_shape_index: int, _local_shape_index: int):
-			print("area_shape_exited")
-			print("area_rid: ",x_area_rid)
-			print("area_rid == x_area_rid: ",area_rid == x_area_rid)
-	)
-	await get_tree().physics_frame
-	await get_tree().physics_frame
-	
-	var finded_instance = NoNodePhysicsFactory.get_area_instance_by_rid(area_rid)
-	print(finded_instance.get_owner() == test_owner_node)
-	
-	finded_instance = null
-	instance = null
-	
-	await get_tree().physics_frame
-	
-	## 判断area-rid和shape-rid被正确释放 注意会出现两个报错
-	test_and_print(PhysicsServer2D.area_get_shape_count(area_rid) == -1,
-	"实例自动销毁后，原先的area_rid无法使用")
-	test_and_print(PhysicsServer2D.shape_get_data(shape_rid) == null,
-	"实例自动销毁后，原先的shape-rid无法使用")
-	
-	print("\n")
 
 #region 1. 生命周期管理测试
 func test_lifecycle_management() -> void:
@@ -126,7 +83,7 @@ func test_physics_properties() -> void:
 	
 	await test_transform_operations()
 	await test_collision_layers()
-	await test_monitorable_property()
+	#await test_monitorable_property()
 
 func test_transform_operations() -> void:
 	print("  - 变换操作测试")
@@ -181,26 +138,6 @@ func test_collision_layers() -> void:
 	test_and_print(success, "碰撞层设置正确")
 	owner_node.queue_free()
 
-func test_monitorable_property() -> void:
-	print("  - 监控属性测试")
-	
-	var not_monitorable_data = base_area_data.duplicate()
-	not_monitorable_data.monitorable = false
-	var instance = NoNodePhysicsFactory.create_area(not_monitorable_data, null)
-	
-	## 创建area-2d节点，理论上应该无法发现instance
-	var area2d := get_area_node(base_area_data)
-	add_child(area2d)
-	area2d.area_shape_entered.connect(
-		func(area_rid: RID, _area: Object, _area_shape_index: int, _local_shape_index: int):
-			test_signal_str += "Test: Monitorable Property\n理论上只打印一次\nmonitorable: %s" %  \
-			NoNodePhysicsFactory.get_area_instance_by_rid(area_rid).monitorable
-	)
-	# 切换监控属性
-	instance.monitorable = true
-	instance = null
-	
-	await get_tree().physics_frame
 
 #endregion
 
@@ -257,36 +194,11 @@ func test_shape_transforms() -> void:
 	await get_tree().physics_frame
 	
 	var actual_transform = PhysicsServer2D.area_get_shape_transform(instance.area_rid, 0)
-	var transform_correct = actual_transform.origin.distance_to(shape_transform.origin) < 0.1
+	var transform_correct = actual_transform.origin.distance_to(shape_transform.origin) == 0.0
 	test_and_print(transform_correct, "形状局部变换正确应用")
 	
 	owner_node.queue_free()
 
-#func test_shape_disabling() -> void:
-	#print("  - 形状禁用测试")
-	#
-	#var owner_node = Node.new()
-	#var instance = NoNodePhysicsFactory.create_area(base_area_data, owner_node)
-	#
-	## 初始应该启用
-	#var initial_disabled = PhysicsServer2D.area_is_shape_disabled(instance.area_rid, 0)
-	#test_and_print(!initial_disabled, "形状初始为启用状态")
-	#
-	## 禁用形状
-	#instance.set_shape_disabled(0, true)
-	#await get_tree().physics_frame
-	#
-	#var disabled_state = PhysicsServer2D.area_is_shape_disabled(instance.area_rid, 0)
-	#test_and_print(disabled_state, "形状成功禁用")
-	#
-	## 重新启用
-	#instance.set_shape_disabled(0, false)
-	#await get_tree().physics_frame
-	#
-	#var enabled_state = !PhysicsServer2D.area_is_shape_disabled(instance.area_rid, 0)
-	#test_and_print(enabled_state, "形状成功启用")
-	#
-	#owner_node.queue_free()
 #endregion
 
 #region 4. 碰撞检测测试
@@ -428,25 +340,8 @@ func test_collision_detection() -> void:
 func test_edge_cases() -> void:
 	print_rich("\n[color=cyan]5. 边界情况测试[/color]")
 	
-	#await test_null_data()
 	await test_space_switching()
 	await test_performance()
-
-#func test_null_data() -> void:
-	#print("  - 空数据测试")
-	#
-	## 测试空数据
-	#var null_data = null
-	#var owner_node = Node.new()
-	#
-	## 这里应该会出错，但我们测试错误处理
-	#var instance = NoNodePhysicsFactory.create_area(null_data, owner_node)
-	#
-	## 实例应该为null或者无效
-	#test_and_print(instance == null or !instance.area_rid.is_valid(), "空数据正确处理")
-	#
-	#if instance and instance.area_rid.is_valid():
-		#owner_node.queue_free()
 
 func test_space_switching() -> void:
 	print("  - 空间切换测试")
@@ -511,6 +406,7 @@ func test_and_print(is_success: bool, success_msg: String) -> void:
 	else:
 		print_rich("    [color=red]✗ %s[/color]" % success_msg)
 
+## 暂时无用
 func get_area_node(data:QuickAreaData,monitoring:bool = true,collision_mask:int = 1)->Area2D:
 	var area2d := Area2D.new()
 	area2d.monitorable = data.monitorable
