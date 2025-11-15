@@ -3,6 +3,7 @@ class_name Instance2D
 
 var transform: Transform2D = Transform2D.IDENTITY:set = set_transform
 
+## TODO: 待改为global-position
 var position: Vector2:
 	get: return transform.origin
 	set(value):
