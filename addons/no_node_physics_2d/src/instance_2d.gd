@@ -76,9 +76,10 @@ var global_transform: Transform2D:
 var global_position: Vector2:
 	get: return global_transform.origin
 	set(value):
-		var new_global = global_transform
-		new_global.origin = value
-		global_transform = new_global
+		if abs(base_transform.determinant()) > 0.0001:
+			position = base_transform.affine_inverse() * value
+		else:
+			position = value
 
 # 脏标记管理
 func _mark_transform_dirty():
@@ -91,7 +92,6 @@ func _mark_transform_values_dirty():
 
 func _update_transform_if_dirty():
 	if _transform_dirty:
-		# 使用Transform2D构造函数创建变换矩阵
 		# 根据文档，使用Transform2D(rotation: float, scale: Vector2, skew: float, position: Vector2)
 		_transform = Transform2D(_rotation, _scale, _skew, _position)
 		_transform_dirty = false
@@ -123,19 +123,19 @@ func apply_scale(ratio: Vector2):
 	scale *= ratio
 
 func look_at(target: Vector2):
-	var direction = (target - global_position).normalized()
-	rotation = atan2(direction.y, direction.x)
+	var local_target = to_local(target)
+	rotation = local_target.angle()
 
 func get_angle_to(target: Vector2) -> float:
 	var local_target = to_local(target)
 	return local_target.angle()
 
-# 坐标转换方法 - 使用basis_xform替代xform
+# 坐标转换方法 - 使用完整的仿射变换
 func to_local(global_point: Vector2) -> Vector2:
-	return global_transform.affine_inverse().basis_xform(global_point)  # 使用basis_xform
+	return global_transform.affine_inverse() * global_point
 
 func to_global(local_point: Vector2) -> Vector2:
-	return global_transform.basis_xform(local_point)  # 使用basis_xform
+	return global_transform * local_point
 
 # 设置基础变换（由持有者调用）
 func set_base_transform(new_base: Transform2D):
