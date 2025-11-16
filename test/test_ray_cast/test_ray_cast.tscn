@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bou5svbbfs0fj"]
+
+[ext_resource type="Script" uid="uid://dovh04in6h83r" path="res://test/test_ray_cast/test_ray_cast.gd" id="1_g3lc8"]
+
+[node name="TestRayCast" type="Node2D"]
+script = ExtResource("1_g3lc8")
