@@ -38,10 +38,14 @@ var scale: Vector2:
 		_update_transform_values_if_dirty()
 		return _scale
 	set(value):
-		# 防止零缩放
+		# 防止零缩放，与Node2D使用相同的阈值
 		var safe_scale = value
-		if abs(safe_scale.x) < 0.0001: safe_scale.x = 0.0001
-		if abs(safe_scale.y) < 0.0001: safe_scale.y = 0.0001
+		if abs(safe_scale.x) < 0.0001:
+			push_warning("new scale.x is near 0!")
+			safe_scale.x = 0.0001
+		if abs(safe_scale.y) < 0.0001:
+			push_warning("new scale.y is near 0!")
+			safe_scale.y = 0.0001
 		_scale = safe_scale
 		_mark_transform_dirty()
 
