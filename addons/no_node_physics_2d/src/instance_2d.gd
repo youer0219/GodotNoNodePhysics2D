@@ -1,165 +1,288 @@
 extends RefCounted
 class_name Instance2D
 
-# 内部状态
-var _position: Vector2 = Vector2.ZERO
-var _rotation: float = 0.0
-var _scale: Vector2 = Vector2.ONE
-var _skew: float = 0.0
+# 私有变量，通过 get/set 方法访问
+var _rotation:float = 0.0
+var _skew:float = 0.0
+var _position:Vector2 = Vector2.ZERO
+var _scale:Vector2 = Vector2.ONE
+var _transform:Transform2D
 
-# 缓存的变换矩阵和脏标记
-var _transform: Transform2D = Transform2D.IDENTITY
-var _transform_dirty: bool = true
+var _xform_dirty:bool = false
 
-# 全局变换支持
-var _global_transform: Transform2D = Transform2D.IDENTITY
-var _global_transform_dirty: bool = true
-var base_transform: Transform2D = Transform2D.IDENTITY  # 持有者的全局变换
+var _global_position:Vector2 = Vector2.ZERO
+var _global_rotation:float = 0.0
+var _global_skew:float = 0.0
+var _global_scale:Vector2 = Vector2.ONE
+var _global_transform:Transform2D
 
-# 公共接口 - 本地变换属性
-var position: Vector2:
-	get: 
-		_update_transform_values_if_dirty()
-		return _position
-	set(value):
-		_position = value
-		_mark_transform_dirty()
+## 目前不能让 parent 变换后自动通知我们，必须由持有者负责更新
+var _global_invalid:bool = true
 
-var rotation: float:
-	get:
-		_update_transform_values_if_dirty()
-		return _rotation
-	set(value):
-		_rotation = value
-		_mark_transform_dirty()
+## TODO:评估是否应为弱引用、是否应该为Node类型
+var _parent:Object
 
-var scale: Vector2:
-	get:
-		_update_transform_values_if_dirty()
-		return _scale
-	set(value):
-		# 防止零缩放，与Node2D使用相同的阈值
-		var safe_scale = value
-		if abs(safe_scale.x) < 0.0001:
-			push_warning("new scale.x is near 0!")
-			safe_scale.x = 0.0001
-		if abs(safe_scale.y) < 0.0001:
-			push_warning("new scale.y is near 0!")
-			safe_scale.y = 0.0001
-		_scale = safe_scale
-		_mark_transform_dirty()
+# 公共属性访问器
+var rotation:float:
+	get = get_rotation,
+	set = set_rotation
 
-var skew: float:
-	get:
-		_update_transform_values_if_dirty()
-		return _skew
-	set(value):
-		_skew = value
-		_mark_transform_dirty()
+var rotation_degrees:float:
+	get = get_rotation_degrees,
+	set = set_rotation_degrees
 
-var transform: Transform2D:
-	get:
-		_update_transform_if_dirty()
-		return _transform
-	set(value):
-		_transform = value
-		_mark_transform_values_dirty()
+var skew:float:
+	get = get_skew,
+	set = set_skew
 
-# 全局变换属性
-var global_transform: Transform2D:
-	get:
-		_update_global_transform_if_dirty()
-		return _global_transform
-	set(value):
-		transform = base_transform.affine_inverse() * value
+var position:Vector2:
+	get = get_position,
+	set = set_position
 
-var global_position: Vector2:
-	get: return global_transform.origin
-	set(value):
-		position = base_transform.affine_inverse() * value
+var scale:Vector2:
+	get = get_scale,
+	set = set_scale
 
-# 脏标记管理
-func _mark_transform_dirty():
-	_transform_dirty = true
-	_global_transform_dirty = true
+var transform:Transform2D:
+	get = get_transform,
+	set = set_transform
 
-func _mark_transform_values_dirty():
-	_transform_dirty = false
-	_global_transform_dirty = true
+var global_position:Vector2:
+	get = get_global_position,
+	set = set_global_position
 
-func _update_transform_if_dirty():
-	if _transform_dirty:
-		# 根据文档，使用Transform2D(rotation: float, scale: Vector2, skew: float, position: Vector2)
-		_transform = Transform2D(_rotation, _scale, _skew, _position)
-		_transform_dirty = false
+var global_rotation:float:
+	get = get_global_rotation,
+	set = set_global_rotation
 
-func _update_transform_values_if_dirty():
-	if _transform_dirty:
-		_update_transform_if_dirty()
-	# 从矩阵中提取分解值
+var global_rotation_degrees:float:
+	get = get_global_rotation_degrees,
+	set = set_global_rotation_degrees
+
+var global_skew:float:
+	get = get_global_skew,
+	set = set_global_skew
+
+var global_scale:Vector2:
+	get = get_global_scale,
+	set = set_global_scale
+
+var global_transform:Transform2D:
+	get = get_global_transform,
+	set = set_global_transform
+
+var parent:Object:
+	get = get_parent,
+	set = set_parent
+
+# 内部方法
+func _set_xform_dirty(is_dirty:bool):
+	_xform_dirty = is_dirty
+
+func _is_xform_dirty()->bool:
+	return _xform_dirty
+
+func _update_xform_values():
 	_rotation = _transform.get_rotation()
 	_skew = _transform.get_skew()
-	_position = _transform.origin
+	_position = _transform.get_origin()
 	_scale = _transform.get_scale()
-	_transform_dirty = false
+	_set_xform_dirty(false)
 
-func _update_global_transform_if_dirty():
-	if _global_transform_dirty:
-		_update_transform_if_dirty()
-		_global_transform = base_transform * _transform
-		_global_transform_dirty = false
+func _update_transform():
+	_transform = Transform2D(_rotation, _scale, _skew, _position)
+	_notify_transform()
 
-# 变换操作方法
-func translate(offset: Vector2):
-	position += offset
+# 公共方法
+func get_parent() -> Object:
+	return _parent
 
-func rotate(radians: float):
-	rotation += radians
+func set_parent(new_parent: Object):
+	_parent = new_parent
 
-func apply_scale(ratio: Vector2):
-	scale *= ratio
+func set_global_invalid(is_invalid:bool):
+	_global_invalid = is_invalid
 
-func look_at(target: Vector2):
-	var local_target = to_local(target)
-	rotation = local_target.angle()
+func reparent(new_parent:Object, keep_global_transform:bool):
+	if keep_global_transform:
+		var tmp = get_global_transform()
+		_parent = new_parent
+		set_global_transform(tmp)
+	else:
+		_parent = new_parent
 
-func get_angle_to(target: Vector2) -> float:
-	var local_target = to_local(target)
-	return local_target.angle()
+func set_position(pos:Vector2):
+	if _is_xform_dirty():
+		_update_xform_values()
+	_position = pos
+	_update_transform()
 
-# 坐标转换方法 - 使用完整的仿射变换
-func to_local(global_point: Vector2) -> Vector2:
-	return global_transform.affine_inverse() * global_point
+func set_rotation(radians:float):
+	if _is_xform_dirty():
+		_update_xform_values()
+	_rotation = radians
+	_update_transform()
 
-func to_global(local_point: Vector2) -> Vector2:
-	return global_transform * local_point
+func set_rotation_degrees(degrees:float):
+	set_rotation(deg_to_rad(degrees))
 
-# 设置基础变换（由持有者调用）
-func set_base_transform(new_base: Transform2D):
-	if base_transform != new_base:
-		base_transform = new_base
-		_global_transform_dirty = true
+func set_skew(radians:float):
+	if _is_xform_dirty():
+		_update_xform_values()
+	_skew = radians
+	_update_transform()
 
-# 重置变换
-func reset_transform():
-	_position = Vector2.ZERO
-	_rotation = 0.0
-	_scale = Vector2.ONE
-	_skew = 0.0
-	_mark_transform_dirty()
+func set_scale(new_scale:Vector2):
+	if _is_xform_dirty():
+		_update_xform_values()
+	_scale = new_scale
+	if is_zero_approx(_scale.x):
+		_scale.x = 0.00001
+	if is_zero_approx(_scale.y):
+		_scale.y = 0.00001
+	_update_transform()
 
-func copy_from(other: Instance2D):
-	# 复制另一个实例的变换
-	base_transform = other.base_transform
-	transform = other.transform
+func get_position()->Vector2:
+	if _is_xform_dirty():
+		_update_xform_values()
+	return _position
 
-# 便捷的静态构造方法
-static func create_at_position(pos: Vector2) -> Instance2D:
-	var instance = Instance2D.new()
-	instance.position = pos
-	return instance
+func get_rotation()->float:
+	if _is_xform_dirty():
+		_update_xform_values()
+	return _rotation
 
-static func create_with_transform(xform: Transform2D) -> Instance2D:
-	var instance = Instance2D.new()
-	instance.transform = xform
-	return instance
+func get_rotation_degrees()->float:
+	return rad_to_deg(get_rotation())
+
+func get_skew()->float:
+	if _is_xform_dirty():
+		_update_xform_values()
+	return _skew
+
+func get_scale()->Vector2:
+	if _is_xform_dirty():
+		_update_xform_values()
+	return _scale
+
+func get_transform()->Transform2D:
+	return _transform
+
+func set_transform(new_transform:Transform2D):
+	_transform = new_transform
+	_set_xform_dirty(true)
+	_notify_transform()
+
+func rotate(radians:float):
+	set_rotation(get_rotation() + radians)
+
+func translate(amount:Vector2):
+	set_position(get_position() + amount)
+
+func apply_scale(amount:Vector2):
+	set_scale(get_scale() * amount)
+
+func move_x(delta: float, scaled: bool = false):
+	var t = get_transform()
+	var axis = t.x  # 局部X轴方向
+	if not scaled:
+		axis = axis.normalized()
+	set_position(t.origin + axis * delta)
+
+func move_y(delta: float, scaled: bool = false):
+	var t = get_transform()
+	var axis = t.y  # 局部Y轴方向
+	if not scaled:
+		axis = axis.normalized()
+	set_position(t.origin + axis * delta)
+
+func get_global_position()->Vector2:
+	return get_global_transform().get_origin()
+
+func set_global_position(new_position:Vector2):
+	if _parent and _parent.has_method("get_global_transform"):
+		var inv = _parent.get_global_transform().affine_inverse()
+		set_position(inv * new_position)
+	else:
+		set_position(new_position)
+
+func get_global_rotation()->float:
+	return get_global_transform().get_rotation()
+
+func get_global_rotation_degrees()->float:
+	return rad_to_deg(get_global_rotation())
+
+func get_global_skew()->float:
+	return get_global_transform().get_skew()
+
+func set_global_rotation(new_rotation:float):
+	if _parent and _parent.has_method("get_global_transform"):
+		var parent_global_transform = _parent.get_global_transform()
+		var new_transform = parent_global_transform * get_transform()
+		new_transform.set_rotation(new_rotation)
+		new_transform = parent_global_transform.affine_inverse() * new_transform
+		set_rotation(new_transform.get_rotation())
+	else:
+		set_rotation(new_rotation)
+
+func set_global_rotation_degrees(degrees:float):
+	set_global_rotation(deg_to_rad(degrees))
+
+func set_global_skew(new_skew:float):
+	if _parent and _parent.has_method("get_global_transform"):
+		var parent_global_transform = _parent.get_global_transform()
+		var new_transform = parent_global_transform * get_transform()
+		new_transform.set_skew(new_skew)
+		new_transform = parent_global_transform.affine_inverse() * new_transform
+		set_skew(new_transform.get_skew())
+	else:
+		set_skew(new_skew)
+
+func get_global_scale()->Vector2:
+	return get_global_transform().get_scale()
+
+func set_global_scale(new_scale:Vector2):
+	if _parent and _parent.has_method("get_global_transform"):
+		var parent_global_transform = _parent.get_global_transform()
+		var new_transform = parent_global_transform * get_transform()
+		new_transform.set_scale(new_scale)
+		new_transform = parent_global_transform.affine_inverse() * new_transform
+		set_scale(new_transform.get_scale())
+	else:
+		set_scale(new_scale)
+
+func get_global_transform()->Transform2D:
+	if _global_invalid:
+		var new_global_transform = Transform2D()
+		if _parent and _parent.has_method("get_global_transform"):
+			new_global_transform = _parent.get_global_transform() * get_transform()
+		else:
+			new_global_transform = get_transform()
+		_global_invalid = false
+		_global_transform = new_global_transform
+	return _global_transform
+
+func set_global_transform(new_global_transform:Transform2D):
+	if _parent and _parent.has_method("get_global_transform"):
+		set_transform(_parent.get_global_transform().affine_inverse() * new_global_transform)
+	else:
+		set_transform(new_global_transform)
+
+func look_at(pos:Vector2):
+	rotate(get_angle_to(pos))
+
+func get_angle_to(pos:Vector2):
+	return (to_local(pos) * get_scale()).angle()
+
+# 将局部坐标转换为全局坐标
+func to_global(local: Vector2) -> Vector2:
+	# 等价于 xform：应用全局变换的基和原点（含平移）
+	return get_global_transform() * local
+
+# 将全局坐标转换为局部坐标
+func to_local(global: Vector2) -> Vector2:
+	# 先求全局变换的逆，再应用完整变换（含平移的逆）
+	return get_global_transform().affine_inverse() * global
+
+func _notify_transform():
+	_global_invalid = true

@@ -2,3 +2,4 @@
 .godot/
 /android/
 addons/godot-rapier2d/
+.vscode/settings.json
