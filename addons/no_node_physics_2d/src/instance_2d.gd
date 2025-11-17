@@ -71,19 +71,12 @@ var global_transform: Transform2D:
 		_update_global_transform_if_dirty()
 		return _global_transform
 	set(value):
-		# 检查基础变换是否可逆（通过行列式）
-		if abs(base_transform.determinant()) > 0.0001:  # 使用determinant()替代is_invertible
-			transform = base_transform.affine_inverse() * value
-		else:
-			transform = value
+		transform = base_transform.affine_inverse() * value
 
 var global_position: Vector2:
 	get: return global_transform.origin
 	set(value):
-		if abs(base_transform.determinant()) > 0.0001:
-			position = base_transform.affine_inverse() * value
-		else:
-			position = value
+		position = base_transform.affine_inverse() * value
 
 # 脏标记管理
 func _mark_transform_dirty():
@@ -154,14 +147,6 @@ func reset_transform():
 	_scale = Vector2.ONE
 	_skew = 0.0
 	_mark_transform_dirty()
-
-# 便捷方法
-func set_global_position_safe(global_pos: Vector2):
-	# 安全设置全局位置，避免矩阵求逆问题
-	if abs(base_transform.determinant()) > 0.0001:
-		global_position = global_pos
-	else:
-		position = global_pos
 
 func copy_from(other: Instance2D):
 	# 复制另一个实例的变换

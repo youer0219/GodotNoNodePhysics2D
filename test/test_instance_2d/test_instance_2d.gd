@@ -1,6 +1,6 @@
 # test_instance_2d.gd
 # Instance2D类的完整测试脚本
-# 该脚本测试Instance2D的所有核心功能，确保其行为与Node2D一致
+# 该脚本测试Instance2D的所有核心功能
 
 extends Node
 
