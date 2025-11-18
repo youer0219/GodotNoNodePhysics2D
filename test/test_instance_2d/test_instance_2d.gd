@@ -7,16 +7,15 @@ extends Node2D
 var instance2d:Instance2D
 
 ## 目前启动一个跟随功能，需要：
-## 父节点启动set_notify_transform通知，在_notification中告知instance2d
-## 同时还要求将父节点作为parent
-## TODO: 可能会尝试简化功能或换新的设计方法，特别是instance目前不打算设计为嵌套，所以可以作一些简化
+## 父节点使用 set_notify_local_transform 启动通知，并在 _notification 中设定实例2D的基础变换值
 
 func _ready():
 	print("开始测试 Instance2D 类")
 	
 	# 启用变换通知，这样当Node2D变换改变时会触发NOTIFICATION_TRANSFORM_CHANGED
 	# 这样当父节点（Node2D）的变换发生变化时，会通过_notification函数通知子节点
-	set_notify_transform(true)
+	# set_notify_transform(true) ## 此通知失效，原因未知。但local通知可用。
+	set_notify_local_transform(true)
 	
 	# 测试基本属性设置和获取
 	test_basic_properties()
@@ -24,11 +23,10 @@ func _ready():
 	# 测试变换操作
 	test_transform_operations()
 	
-	# 测试父子关系和全局变换
 	test_parent_child_relationships()
 	
-	# 测试多级父子关系
-	test_deep_parent_hierarchy()  
+	# 测试父子关系和全局变换
+	test_complex_parent_transforms()
 	
 	# 测试坐标转换
 	test_coordinate_transforms()
@@ -185,74 +183,48 @@ func test_transform_operations():
 func test_parent_child_relationships():
 	print("测试父子关系...")
 	
-	# 创建Instance2D实例并设置父节点为当前Node2D
+	# 创建Instance2D实例并设置base_transform来模拟父子关系
 	instance2d = Instance2D.new()
-	instance2d.set_parent(self)
 	
-	# 验证父子关系下的全局位置更新
-	# 当父节点（Node2D）移动时，子节点（Instance2D）的全局位置应该跟随变化
-	# 但局部位置保持不变
-	var test_move := Vector2(10, 10)  # 测试移动向量
-	self.global_position = test_move  # 移动父节点
+	# 创建父节点变换
+	var parent_transform = Transform2D(0, Vector2.ONE, 0, Vector2(10, 10))
+	transform = parent_transform
 	
 	# 验证：Instance2D的局部位置不应改变
-	# 局部位置是相对于父节点的坐标，父节点移动不应影响局部位置
 	assert(instance2d.position == Vector2.ZERO, "instance的局部位置不应该改变")
 	
-	# 验证：Instance2D的全局位置应该跟随父节点变化
-	# 全局位置是相对于世界坐标的，父节点移动应该影响全局位置
-	assert(instance2d.global_position == test_move, "instance的全局位置应该跟随着改变")
+	# 验证：Instance2D的全局位置应该跟随base_transform变化
+	assert(instance2d.global_position.distance_to(Vector2(10, 10)) < 0.001, "instance的全局位置应该跟随着改变")
 	
-	# 重置父节点位置
-	self.global_position = Vector2.ZERO
-	
-	# 测试reparent功能
-	# 验证重新设置父节点时是否正确保持全局位置
-	var new_parent = Node2D.new()
-	new_parent.position = Vector2(50, 50)
-	add_child(new_parent)  # 将新父节点添加到场景树中
-	var original_global_pos = instance2d.get_global_position()  # 原全局位置 (0,0)
-	instance2d.reparent(new_parent, true)  # 保持全局位置
-	# 设置全局无效标记，强制重新计算全局变换
-	instance2d.set_global_invalid(true)
-	# 验证：重新设置父节点后，全局位置应该保持不变
-	assert(instance2d.get_global_position().distance_to(original_global_pos) < 0.001, "reparent保持全局位置失败")
-	
-	# 清理资源
-	new_parent.queue_free()
+	# 重置base_transform
+	self.transform = Transform2D()
 	
 	print("父子关系测试通过")
 
-func test_deep_parent_hierarchy():
-	print("测试深度父子层次...")
+func test_complex_parent_transforms():
+	print("测试复杂父子变换...")
 	
-	# 创建多级父子关系：Node2D -> grand_parent -> parent -> child(Instance2D)
-	# 验证多级父子关系下的全局变换计算
-	var grand_parent = Node2D.new()
-	var parent = Node2D.new()
-	var child = Instance2D.new()
+	instance2d = Instance2D.new()
 	
-	# 将节点添加到场景树中
-	add_child(grand_parent)
-	grand_parent.add_child(parent)
-	# 设置父子关系（注意：child.set_parent不添加到场景树，只是设置父引用）
-	child.set_parent(parent)
+	# 测试带旋转和缩放的base_transform
+	var complex_base = Transform2D(PI/4, Vector2(2, 1.5), 0, Vector2(50, 30))
+	self.transform = complex_base
+	instance2d.position = Vector2(10, 5)
 	
-	# 测试各级变换传递
-	# grand_parent: (100, 0)
-	# parent: (0, 50) 相对于grand_parent
-	# child: (20, 10) 相对于parent
-	# 期望全局位置: (100, 0) + (0, 50) + (20, 10) = (120, 60)
-	grand_parent.position = Vector2(100, 0)
-	parent.position = Vector2(0, 50)
-	child.position = Vector2(20, 10)
+	# 验证全局变换是否正确组合
+	var expected_global = complex_base * instance2d.transform
+	var actual_global = instance2d.global_transform
 	
-	var expected_global = grand_parent.global_position + parent.position + child.position
-	# child.global_position应该等于(120, 60)
-	assert(child.global_position.distance_to(expected_global) < 0.001, "深度父子层次全局位置计算错误")
+	assert(actual_global.is_equal_approx(expected_global), "复杂父子变换计算错误")
 	
-	# 清理资源
-	grand_parent.queue_free()
+	# 测试通过base_transform设置全局属性
+	var new_global_pos = Vector2(200, 100)
+	instance2d.global_position = new_global_pos
+	
+	# 验证全局位置设置是否正确
+	assert(instance2d.global_position.distance_to(new_global_pos) < 0.001, "通过base_transform设置全局位置失败")
+	
+	print("复杂父子变换测试通过")
 
 func test_complex_transforms():
 	print("测试复杂变换组合...")
@@ -450,10 +422,9 @@ func test_other_functions():
 	print("其他功能测试通过")
 
 func _notification(what: int) -> void:
-	# 监听变换变化通知，当父节点变换改变时通知子节点
-	# 这是实现父子关系全局变换同步的关键机制
+	# 监听变换变化通知，当父节点变换改变时改变实例的base变换
 	match what:
-		NOTIFICATION_TRANSFORM_CHANGED:
-			# 标记Instance2D的全局变换为无效，下次访问时会重新计算
-			# 这样当父节点变换改变时，子节点的全局变换会被重新计算
-			instance2d.set_global_invalid(true)
+		#NOTIFICATION_TRANSFORM_CHANGED:
+			#instance2d.base_transform = get_global_transform()
+		NOTIFICATION_LOCAL_TRANSFORM_CHANGED:
+			instance2d.base_transform = get_global_transform()
