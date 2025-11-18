@@ -70,10 +70,11 @@ func set_shape_transform(shape_transform: Transform2D) -> void:
 
 func set_space(space: RID) -> void:
 	PhysicsServer2D.area_set_space(area_rid, space)
-## 暂时不考虑area-instance
-#func set_transform(new_transform: Transform2D) -> void:
-	#super(new_transform)
-	#PhysicsServer2D.area_set_transform(area_rid, transform)
+
+func _notify_transform():
+	super()
+	PhysicsServer2D.area_set_transform(area_rid, get_global_transform())
+
 #endregion
 
 #region 监控管理
