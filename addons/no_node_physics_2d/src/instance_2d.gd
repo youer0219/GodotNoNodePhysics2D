@@ -16,13 +16,14 @@ var _global_skew:float = 0.0
 var _global_scale:Vector2 = Vector2.ONE
 var _global_transform:Transform2D
 
-## 目前不能让 parent 变换后自动通知我们，必须由持有者负责更新
 var _global_invalid:bool = true
 
 ## TODO:评估是否应为弱引用、是否应该为Node类型
-var _parent:Object
+var parent:Object:
+	get = get_parent,
+	set = set_parent
 
-# 公共属性访问器
+## 公共属性访问器 TODO:思考怎么直接存值而不需要`_*`变量
 var rotation:float:
 	get = get_rotation,
 	set = set_rotation
@@ -71,10 +72,6 @@ var global_transform:Transform2D:
 	get = get_global_transform,
 	set = set_global_transform
 
-var parent:Object:
-	get = get_parent,
-	set = set_parent
-
 # 内部方法
 func _set_xform_dirty(is_dirty:bool):
 	_xform_dirty = is_dirty
@@ -95,10 +92,10 @@ func _update_transform():
 
 # 公共方法
 func get_parent() -> Object:
-	return _parent
+	return parent
 
 func set_parent(new_parent: Object):
-	_parent = new_parent
+	parent = new_parent
 
 func set_global_invalid(is_invalid:bool):
 	_global_invalid = is_invalid
@@ -106,10 +103,10 @@ func set_global_invalid(is_invalid:bool):
 func reparent(new_parent:Object, keep_global_transform:bool):
 	if keep_global_transform:
 		var tmp = get_global_transform()
-		_parent = new_parent
+		parent = new_parent
 		set_global_transform(tmp)
 	else:
-		_parent = new_parent
+		parent = new_parent
 
 func set_position(pos:Vector2):
 	if _is_xform_dirty():
@@ -200,8 +197,8 @@ func get_global_position()->Vector2:
 	return get_global_transform().get_origin()
 
 func set_global_position(new_position:Vector2):
-	if _parent and _parent.has_method("get_global_transform"):
-		var inv = _parent.get_global_transform().affine_inverse()
+	if parent and parent.has_method("get_global_transform"):
+		var inv = parent.get_global_transform().affine_inverse()
 		set_position(inv * new_position)
 	else:
 		set_position(new_position)
@@ -216,8 +213,8 @@ func get_global_skew()->float:
 	return get_global_transform().get_skew()
 
 func set_global_rotation(new_rotation:float):
-	if _parent and _parent.has_method("get_global_transform"):
-		var parent_global_transform = _parent.get_global_transform()
+	if parent and parent.has_method("get_global_transform"):
+		var parent_global_transform = parent.get_global_transform()
 		var new_transform = parent_global_transform * get_transform()
 		new_transform.set_rotation(new_rotation)
 		new_transform = parent_global_transform.affine_inverse() * new_transform
@@ -229,8 +226,8 @@ func set_global_rotation_degrees(degrees:float):
 	set_global_rotation(deg_to_rad(degrees))
 
 func set_global_skew(new_skew:float):
-	if _parent and _parent.has_method("get_global_transform"):
-		var parent_global_transform = _parent.get_global_transform()
+	if parent and parent.has_method("get_global_transform"):
+		var parent_global_transform = parent.get_global_transform()
 		var new_transform = parent_global_transform * get_transform()
 		new_transform.set_skew(new_skew)
 		new_transform = parent_global_transform.affine_inverse() * new_transform
@@ -242,8 +239,8 @@ func get_global_scale()->Vector2:
 	return get_global_transform().get_scale()
 
 func set_global_scale(new_scale:Vector2):
-	if _parent and _parent.has_method("get_global_transform"):
-		var parent_global_transform = _parent.get_global_transform()
+	if parent and parent.has_method("get_global_transform"):
+		var parent_global_transform = parent.get_global_transform()
 		var new_transform = parent_global_transform * get_transform()
 		new_transform.set_scale(new_scale)
 		new_transform = parent_global_transform.affine_inverse() * new_transform
@@ -254,8 +251,8 @@ func set_global_scale(new_scale:Vector2):
 func get_global_transform()->Transform2D:
 	if _global_invalid:
 		var new_global_transform = Transform2D()
-		if _parent and _parent.has_method("get_global_transform"):
-			new_global_transform = _parent.get_global_transform() * get_transform()
+		if parent and parent.has_method("get_global_transform"):
+			new_global_transform = parent.get_global_transform() * get_transform()
 		else:
 			new_global_transform = get_transform()
 		_global_invalid = false
@@ -263,8 +260,8 @@ func get_global_transform()->Transform2D:
 	return _global_transform
 
 func set_global_transform(new_global_transform:Transform2D):
-	if _parent and _parent.has_method("get_global_transform"):
-		set_transform(_parent.get_global_transform().affine_inverse() * new_global_transform)
+	if parent and parent.has_method("get_global_transform"):
+		set_transform(parent.get_global_transform().affine_inverse() * new_global_transform)
 	else:
 		set_transform(new_global_transform)
 
