@@ -7,15 +7,14 @@ extends Node2D
 var instance2d:Instance2D
 
 ## 目前启动一个跟随功能，需要：
-## 父节点使用 set_notify_local_transform 启动通知，并在 _notification 中设定实例2D的基础变换值
+## 父节点使用 set_notify_transform 启动通知，并在 _notification 中设定 instance2d 的基础变换值
 
 func _ready():
 	print("开始测试 Instance2D 类")
 	
 	# 启用变换通知，这样当Node2D变换改变时会触发NOTIFICATION_TRANSFORM_CHANGED
-	# 这样当父节点（Node2D）的变换发生变化时，会通过_notification函数通知子节点
-	# set_notify_transform(true) ## 此通知失效，原因未知。但local通知可用。
-	set_notify_local_transform(true)
+	# 注意，这个通知不会在变换后立即发出，所以测试中需要等待一帧再检验结果
+	set_notify_transform(true)
 	
 	# 测试基本属性设置和获取
 	test_basic_properties()
@@ -23,10 +22,11 @@ func _ready():
 	# 测试变换操作
 	test_transform_operations()
 	
-	test_parent_child_relationships()
+	# 测试父子关系
+	await test_parent_child_relationships()
 	
-	# 测试父子关系和全局变换
-	test_complex_parent_transforms()
+	# 测试复杂父子变换
+	await test_complex_parent_transforms()
 	
 	# 测试坐标转换
 	test_coordinate_transforms()
@@ -188,7 +188,10 @@ func test_parent_child_relationships():
 	
 	# 创建父节点变换
 	var parent_transform = Transform2D(0, Vector2.ONE, 0, Vector2(10, 10))
-	transform = parent_transform
+	self.transform = parent_transform
+	
+	# 等待一帧
+	await get_tree().process_frame
 	
 	# 验证：Instance2D的局部位置不应改变
 	assert(instance2d.position == Vector2.ZERO, "instance的局部位置不应该改变")
@@ -210,6 +213,9 @@ func test_complex_parent_transforms():
 	var complex_base = Transform2D(PI/4, Vector2(2, 1.5), 0, Vector2(50, 30))
 	self.transform = complex_base
 	instance2d.position = Vector2(10, 5)
+	
+	# 等待一物理帧
+	await get_tree().physics_frame
 	
 	# 验证全局变换是否正确组合
 	var expected_global = complex_base * instance2d.transform
@@ -424,7 +430,6 @@ func test_other_functions():
 func _notification(what: int) -> void:
 	# 监听变换变化通知，当父节点变换改变时改变实例的base变换
 	match what:
-		#NOTIFICATION_TRANSFORM_CHANGED:
-			#instance2d.base_transform = get_global_transform()
-		NOTIFICATION_LOCAL_TRANSFORM_CHANGED:
+		NOTIFICATION_TRANSFORM_CHANGED:
+			print("NOTIFICATION_TRANSFORM_CHANGED")
 			instance2d.base_transform = get_global_transform()
