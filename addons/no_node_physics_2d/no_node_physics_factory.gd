@@ -12,12 +12,12 @@ var space: RID
 func _ready() -> void:
 	space = get_world_2d().space
 
-#region Area2D 工厂方法
-# 创建新的 AreaInstance
+#region Area2DInstance 工厂方法
+# 创建新的 Area2DInstance
 func create_area(area_data: Area2DInstanceData, area_owner: Object, area_transform: Transform2D = Transform2D()) -> Area2DInstance:
 	return Area2DInstance.new(area_data, area_owner, area_transform, space)
 
-# 根据 RID 获取 AreaInstance
+# 根据 RID 获取 Area2DInstance
 func get_area_instance_by_rid(rid: RID) -> Area2DInstance:
 	var id = PhysicsServer2D.area_get_object_instance_id(rid)
 	var instance = instance_from_id(id)

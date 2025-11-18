@@ -1,4 +1,4 @@
-# quick_area_data.gd
+# area_2d_instance_data.gd
 class_name Area2DInstanceData
 extends Resource
 
