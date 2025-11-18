@@ -1,5 +1,5 @@
 extends Resource
-class_name QuickRayCastData
+class_name RayCast2DInstanceData
 
 @export var collide_with_areas:bool = false
 @export var collide_with_bodies:bool = true

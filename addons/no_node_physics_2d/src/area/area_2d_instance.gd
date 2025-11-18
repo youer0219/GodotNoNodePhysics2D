@@ -1,16 +1,16 @@
 # ============================================================================
-#  QuickAreaInstance.gd
+#  Area2DInstance.gd
 # ---------------------------------------------------------------------------
 #  轻量级 2D 区域实例，直接操作 PhysicsServer2D，
 #  仅能被检测，不能检测其他区域或实体。
 # ============================================================================
-class_name QuickAreaInstance
+class_name Area2DInstance
 extends Instance2D
 
 #region 核心句柄与数据
 var area_rid: RID
 var shape_rid: RID
-var data: QuickAreaData
+var data: Area2DInstanceData
 var owner_weakref: WeakRef
 #endregion
 
@@ -22,11 +22,11 @@ var monitorable: bool = true:
 #endregion
 
 #region 构造 / 初始化 / 销毁
-func _init(area_data: QuickAreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
+func _init(area_data: Area2DInstanceData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
 	area_rid = PhysicsServer2D.area_create()
 	setup(area_data, area_owner, area_transform, space)
 
-func setup(area_data: QuickAreaData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
+func setup(area_data: Area2DInstanceData, area_owner: Object, area_transform: Transform2D, space: RID) -> void:
 	data            = area_data
 	owner_weakref   = weakref(area_owner)
 	transform       = area_transform
@@ -82,7 +82,7 @@ func _update_monitorable() -> void:
 #endregion
 
 #region 形状工具
-func _create_area_shape(new_area_data: QuickAreaData) -> void:
+func _create_area_shape(new_area_data: Area2DInstanceData) -> void:
 	var sr = new_area_data.shape_resource
 	match typeof(sr):
 		TYPE_OBJECT:
@@ -104,7 +104,7 @@ func _create_area_shape(new_area_data: QuickAreaData) -> void:
 			else:
 				push_error("Unsupported shape type: " + sr.get_class())
 		TYPE_NIL:
-			push_error("QuickAreaData.shape_resource is null!")
+			push_error("Area2DInstanceData.shape_resource is null!")
 		_:
 			push_error("Unknown shape_resource type!")
 #endregion

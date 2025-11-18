@@ -14,14 +14,14 @@ func _ready() -> void:
 
 #region Area2D 工厂方法
 # 创建新的 AreaInstance
-func create_area(area_data: QuickAreaData, area_owner: Object, area_transform: Transform2D = Transform2D()) -> QuickAreaInstance:
-	return QuickAreaInstance.new(area_data, area_owner, area_transform, space)
+func create_area(area_data: Area2DInstanceData, area_owner: Object, area_transform: Transform2D = Transform2D()) -> Area2DInstance:
+	return Area2DInstance.new(area_data, area_owner, area_transform, space)
 
 # 根据 RID 获取 AreaInstance
-func get_area_instance_by_rid(rid: RID) -> QuickAreaInstance:
+func get_area_instance_by_rid(rid: RID) -> Area2DInstance:
 	var id = PhysicsServer2D.area_get_object_instance_id(rid)
 	var instance = instance_from_id(id)
-	return instance as QuickAreaInstance
+	return instance as Area2DInstance
 #endregion
 
 #region 未来 Cast 工厂方法（预留）

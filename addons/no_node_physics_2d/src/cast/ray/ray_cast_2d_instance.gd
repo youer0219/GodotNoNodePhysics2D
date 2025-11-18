@@ -1,7 +1,7 @@
 extends Instance2D
-class_name QuickRayCastInstance
+class_name RayCast2DInstance
 
-var data:QuickRayCastData
+var data:RayCast2DInstanceData
 
 # 基本属性
 var enabled: bool = true
@@ -31,7 +31,7 @@ var _space_state: PhysicsDirectSpaceState2D = null
 
 # 构造函数
 func _init(
-	ray_cast_data:QuickRayCastData, ## Ray属性配置
+	ray_cast_data:RayCast2DInstanceData, ## Ray属性配置
 	space_state: PhysicsDirectSpaceState2D,
 	exclude_parent_collision_object_2d:CollisionObject2D = null ## 需要排除碰撞的“父”节点
 	) -> void:

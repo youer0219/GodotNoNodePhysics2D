@@ -1,5 +1,5 @@
 # quick_area_data.gd
-class_name QuickAreaData
+class_name Area2DInstanceData
 extends Resource
 
 @export var shape_resource: Shape2D
